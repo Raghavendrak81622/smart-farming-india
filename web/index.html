@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Farming India</title>
+<link rel="stylesheet" href="/assets/style.css">
+<script src="/assets/app.js" type="module"></script>
+</head>
+<body>
+<header class="masthead">
+  <div class="frame brand">
+    <svg width="34" height="34" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="11" fill="#d8e7b3"/><path d="M18 27v-9m0 5c-6 0-9-4-9-9 6 0 9 3 9 9Zm0-4c0-6 3-9 9-9 0 5-3 9-9 9Z" fill="none" stroke="#244a2a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Smart Farming India</span>
+  </div>
+</header>
+<main class="frame">
+  <section class="intro">
+    <h1>What should you grow?</h1>
+    <p>Use your soil report, PIN code and land size to compare crops and estimate your harvest and returns.</p>
+  </section>
+  <form id="farm" class="card">
+    <fieldset>
+      <legend>Farm location and size</legend>
+      <div class="fields two">
+        <label>Indian PIN code<input name="pin" inputmode="numeric" pattern="[1-9][0-9]{5}" maxlength="6" placeholder="e.g. 440001" autocomplete="postal-code" required aria-describedby="pin-status"></label>
+        <label>Land size (acres)<input name="acres" type="number" min="0.01" max="10000" step="any" placeholder="e.g. 2" required></label>
+      </div>
+      <p id="pin-status" class="small" role="status"></p>
+      <label id="place-choice" hidden>Choose district for this PIN<select name="location_index"></select></label>
+    </fieldset>
+    <fieldset>
+      <legend>Soil report</legend>
+      <div class="fields four">
+        <label>Soil pH<input name="ph" type="number" min="0" max="14" step="any" placeholder="e.g. 6.5" required></label>
+        <label>Nitrogen (N)<input name="n" type="number" min="0" max="100000" step="any" placeholder="Optional"></label>
+        <label>Phosphorus (P)<input name="p" type="number" min="0" max="100000" step="any" placeholder="Optional"></label>
+        <label>Potassium (K)<input name="k" type="number" min="0" max="100000" step="any" placeholder="Optional"></label>
+      </div>
+      <div class="unit-row">
+        <label class="choice"><input type="checkbox" name="source_scale"> These NPK numbers use the training CSV’s numeric scale</label>
+        <p class="small">Leave this unchecked for ordinary soil reports. The training file does not document its NPK units.</p>
+      </div>
+    </fieldset>
+    <button type="submit">Compare crops <span aria-hidden="true">→</span></button>
+    <p id="request-status" role="status"></p>
+  </form>
+  <section id="results" aria-label="Farming recommendations"></section>
+</main>
+</body>
+</html>

@@ -1,0 +1,9 @@
+.deps/
+.venv/
+__pycache__/
+cache/
+/data/
+/sources/*.csv
+/*.csv
+/*.zip
+/*.nc
