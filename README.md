@@ -1,10 +1,10 @@
-# Smart Farming India
+# Fieldwise · Smart Farming India
 
-A single local web page for crop recommendations, PIN-area forecasts, crop threats and treatments, expected harvest and estimated profit.
+Fieldwise uses local postal, production and agronomy references to compare crops and estimate harvest and returns. Farm plans and soil reports stay on the device. Climate inputs stay on the server and are excluded from recommendation responses and saved plans.
 
-## Run
+## Run on Windows 11
 
-From this folder in PowerShell, run `.\Start-Farming.ps1`, then open [the app](http://127.0.0.1:8000/). The generated data and models in `cache` are ready to use. The launcher uses a local virtual environment or the available Codex bundled Python. To install in a fresh Python 3.12 environment:
+From the project folder, run `.\Start-Farming.ps1` and open [Fieldwise](http://127.0.0.1:8000/). To make a fresh Python 3.12 environment:
 
 ```powershell
 py -3.12 -m venv .venv
@@ -13,18 +13,36 @@ py -3.12 -m venv .venv
 .\Start-Farming.ps1
 ```
 
-### Data for a fresh clone
+Keep the local datasets in the locations below. Run `prepare` while the server is stopped. The existing Codex-bundled environment and .NET-independent Windows OCR implementation were tested. Fresh Windows installs need a Windows OCR language, such as English, in Language settings. PDFs with usable text do not need Windows OCR. The app manual form remains available if report extraction fails. Python only processes the first three PDF pages and caps uploads at 8 MB. Verify extracted values and choose the appropriate nutrient units.
 
-Place your original `Crop_recommendation.csv`, `archive (1).zip` (with member `csv/2026.csv`), and `9ef84268-d588-465a-a308-a864a43d0070.csv` at the project root. Save the public [postal directory CSV](https://raw.githubusercontent.com/dropdevrahul/pincodes-india/master/pincode.csv) as `sources/pins.csv` and the [district crop production CSV](https://raw.githubusercontent.com/Ankush-Manhas840/crop-yield-prediction/master/data/crop_production.csv) as `sources/production.csv`. Then run `prepare` to generate the local lookup and models. The repository tracks app source only.
+## Farmer workflow
 
-Live weather needs internet access. The app sends approximate postal-area coordinates to MET Norway. Soil values, acreage and selling prices are kept local. If weather is unavailable, recommendations fall back to soil measurements and regional crop records. To deploy or distribute, review the weather provider's terms and set `SMARTFARM_WEATHER_USER_AGENT` to an identifying application string with your contact URL or email. [MET Norway forecast documentation](https://api.met.no/weatherapi/locationforecast/2.0/documentation) · [Weather service terms](https://api.met.no/doc/TermsOfService)
+Enter a PIN, acreage, season, pH, nutrients and water access. Where a PIN crosses districts, select one. Fieldwise screens for each supported crop’s selected-season district or state evidence, soil pH, tested nutrients, water access, soil type and repeat-crop caution. Its High, Moderate and Low categories are rules-based screens. A High result means no screening caution was triggered. It does not replace local variety or field advice. Fieldwise shows up to five matches, with fewer where the data does not support more.
 
-## How the estimates work
+Open the cultivation and crop protection guides for the source-based methods. References state their scope, and the app labels the pest watchlist as common threats without local outbreak confirmation. Current pesticide registration and label applicability could not be verified from the available records. The app offers IPM and directs farmers to their local KVK or agricultural officer for chemical selection. Crop photos and available identification photos have individual source and licence credits.
 
-- **PIN and season.** The local PIN file is a mirror of the India Post directory. A PIN can serve multiple districts. Forecasts use median office coordinates for the selected district. Kharif, Rabi and summer are inferred from the current India month as broad planning seasons. Historical production evidence determines which crops have been grown in that season. [India Post source mirror](https://github.com/dropdevrahul/pincodes-india)
-- **Crop recommendation.** Four newly trained random-forest variants use pH, optionally comparable NPK measurements, and, when available, near-term forecast temperature and humidity. Forecast rain informs planting and treatment timing. The crop file does not document the rainfall window or NPK units. Ordinary laboratory NPK measurements are displayed without using them as training-scale values. Scores are exploratory reference matches.
-- **Yield.** Uses the median of up to five recorded seasonal district yields, with a labelled state fallback. At least three distinct seasons and an observation from 2018 or later are required. Acres convert to hectares, and the median yield scales to land area. Training coverage is limited to six crops with matching evidence. The chronological test of the district median reported 0.303 tonnes per hectare MAE across 4,906 groups. Source records end in 2022. [Government APY reports](https://data.desagri.gov.in/website/crops-apy-report-web) · [Data mirror](https://github.com/Ankush-Manhas840/crop-yield-prediction)
-- **Pests and treatments.** Crop watchlists and management notes use field references. District outbreak probabilities need surveillance data. Chemical references are crop and pest specific and link to published labels. Have the current pack label and field diagnosis verified before treatment. [PPQS maize fall armyworm guide](https://www.ppqs.gov.in/sites/default/files/faw_do.pdf) · [NIPHM chickpea IPM guide](https://niphm.gov.in/IPMPackages/Chickpea.pdf)
-- **Profit.** For compatible crops, the app multiplies expected quintals by a confirmed selling price and subtracts the expense estimate. The local archive quote files omit the unit, so confirm ₹/quintal or enter a local price. Estimated expenses use the 2024–25 all-India A2+FL benchmark for the published crop and season. Farmer-entered total cost can replace the benchmark. Rice finance is withheld because the production file does not establish the paddy/milled basis. Figures are planning scenarios. [CACP table 2.72](https://nccd.gov.in/uploads/Agricultural_Statisitcs_at_a_Glance_2024_25_11da3cd37d.pdf)
+Conservative, average and optimistic yields use the minimum, arithmetic mean and maximum of up to five annual yields for the crop, season and geography. Fieldwise applies the yield per hectare to acreage after conversion (one acre = 0.40468564224 ha and one tonne = 10 quintals). The average historical district estimate had a latest-year holdout MAE of 0.303 t/ha across 4,906 series with sufficient records. Records end in 2022 and the historical range is not a prediction interval. Rice harvest retains the source’s unspecified rice basis, so rice revenue is withheld.
 
-Original uploaded CSV, ZIP and NetCDF files remain in the project root. The rebuilt app does not load the previous app or write a farm history. The previous activity database was retained because it contains saved plans.
+Price and total costs stay fixed across the three yield scenarios. Confirm the selling price in ₹/quintal. Fieldwise calculates revenue as quintals × price and profit as revenue less whole-farm cost. A matching 2024–25 CACP A2+FL benchmark multiplied by the average harvest supplies a default where available. It covers paid costs and family labour and is a national historical benchmark. Enter a farm total or complete itemised budget to override it. A partial breakdown remains a subtotal. Save a plan explicitly to retain its input, estimates and budget in `data/fieldwise-plans.sqlite`. Back up that file to keep your plans.
+
+## Data audit
+
+| Source | Coverage and limitations |
+|---|---|
+| `Crop_recommendation.csv` | 2,200 rows, 22 crop labels, no missing cells, no dated or geographic labels, and no verified NPK units or rainfall accumulation interval. The six-crop legacy classifiers were evaluated on 120 stratified holdout rows. The pH-only variant scored 32.5% on that dataset. The other variant scores measure the source distribution and do not validate field suitability. Models remain local research artifacts and are not loaded by the app. |
+| `archive (2).zip` | A single duplicate crop CSV. Excluded. |
+| `archive.zip` | PlantVillage image archive, 41,278 entries including repeated image trees. It lacks district and collection dates. It cannot establish outbreak risk and is excluded from recommendations. |
+| `archive (1).zip` | Mandi quotes in overlapping annual CSV and Parquet representations, with date, state, district, market, crop, variety, grade and quote values. Fieldwise streams the 2026 CSV partition rather than processing both formats. The supplied files do not state the currency or weight basis. |
+| `9ef84268-d588-465a-a308-a864a43d0070.csv` | 9,585 rows across 24 state labels, no missing cells and all dated 16 November 2026. The file has no price unit column. Quotes are shown as archive evidence and cannot automatically populate the profit calculation. |
+| `RFone_imd_rf_1x1_*.nc` | Six nonempty IMD 1° daily rainfall files for 2020–2025, in mm. Two empty selection files are skipped. Negative fill values and incomplete seasons are excluded. Seasonal grid averages require at least three complete years. They inform a conservative water-access check for paddy/maize. A missing local grid leaves rainfall out of the screen. |
+| `sources/pins.csv` | Public India Post directory mirror. 157,126 office rows, 36 state/territory labels and 19,300 distinct supplied PINs. About 8,800 entries are missing one or both coordinates. A known test office is excluded. Coordinates approximate the postal area and do not identify individual farms. |
+| `sources/production.csv` | Mirrored government area/production statistics, 407,315 rows across 34 supplied state labels, 1997–2022. Production is missing in 4,973 rows. Fieldwise uses the six supported crops, matching seasons, positive area and production, and plausibility screening. No variety-specific yield is available. |
+| CACP and agronomy references | National crop/season cost benchmarks and source-specific crop methods. District input costs are absent. Soil ratings are used only for available elemental nutrient values in kg/ha. |
+
+Kharif uses June–September, Rabi October–February across years, and Zaid March–May for the internal rainfall screen. The APY Summer category maps to Zaid. The annual season records and coarse rainfall grid do not resolve exact village sowing dates. [Soil testing manual](https://soilhealth.dac.gov.in/files/Manual/14072023Manual_Class_9_10.pdf) · [Crop water benchmarks](https://www.fao.org/4/s2022e/s2022e02.htm) · [CACP cost table 2.72](https://nccd.gov.in/uploads/Agricultural_Statisitcs_at_a_Glance_2024_25_11da3cd37d.pdf)
+
+### Data setup for a fresh clone
+
+Place the original crop CSV, two market sources and the IMD NetCDF files at the project root as named above. Copy the [India Post directory mirror](https://raw.githubusercontent.com/dropdevrahul/pincodes-india/master/pincode.csv) to `sources/pins.csv` and the [production mirror](https://raw.githubusercontent.com/Ankush-Manhas840/crop-yield-prediction/master/data/crop_production.csv) to `sources/production.csv`. Run `prepare` to refresh the ignored cache and validation report. User data, generated evidence and datasets stay local. [Government APY reports](https://data.desagri.gov.in/website/crops-apy-report-web)
+
+If you acquire a unit-confirmed official market extract, import it as `sources/verified_prices.csv` with `State,District,Market,Commodity,Variety,Grade,Arrival_Date,Modal_Price,unit,source`. Dates use YYYY-MM-DD, unit must be `INR/quintal` and source must link to the corresponding government report. Validate the quote and crop basis before importing. Quotes older than 30 days require a manual selling-price entry.

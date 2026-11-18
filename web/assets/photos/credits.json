@@ -1,0 +1,72 @@
+{
+  "pigeonpeas": {
+    "title": "Cajanus cajan Blanco1.167-cropped.jpg",
+    "author": "Francisco Manuel Blanco (O.S.A.)",
+    "source": "https://commons.wikimedia.org/wiki/File:Cajanus_cajan_Blanco1.167-cropped.jpg",
+    "license": "Public domain",
+    "license_url": ""
+  },
+  "fall-armyworm": {
+    "title": "Spodoptera frugiperda.jpg",
+    "author": "See source page",
+    "source": "https://commons.wikimedia.org/wiki/File:Spodoptera_frugiperda.jpg",
+    "license": "Public domain",
+    "license_url": ""
+  },
+  "pod-borer": {
+    "title": "Helicoverpa armigera.jpg",
+    "author": "Eric SYLVESTRE",
+    "source": "https://commons.wikimedia.org/wiki/File:Helicoverpa_armigera.jpg",
+    "license": "CC BY 2.5",
+    "license_url": "https://creativecommons.org/licenses/by/2.5"
+  },
+  "whitefly": {
+    "title": "Silverleaf whitefly.jpg",
+    "author": "See source page",
+    "source": "https://commons.wikimedia.org/wiki/File:Silverleaf_whitefly.jpg",
+    "license": "Public domain",
+    "license_url": ""
+  },
+  "rice": {
+    "title": "20201102.Hengnan.Hybrid rice Sanyou-1.6.jpg",
+    "author": "China News Service",
+    "source": "https://commons.wikimedia.org/wiki/File:20201102.Hengnan.Hybrid_rice_Sanyou-1.6.jpg",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0"
+  },
+  "maize": {
+    "title": "Wiki Maize.jpg",
+    "author": "Unlimited Ed",
+    "source": "https://commons.wikimedia.org/wiki/File:Wiki_Maize.jpg",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "chickpea": {
+    "title": "Chickpea BNC.jpg",
+    "author": "Prathyush Thomas",
+    "source": "https://commons.wikimedia.org/wiki/File:Chickpea_BNC.jpg",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "mungbean": {
+    "title": "Mung beans (Vigna radiata).jpg",
+    "author": "Ivar Leidus",
+    "source": "https://commons.wikimedia.org/wiki/File:Mung_beans_(Vigna_radiata).jpg",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "blackgram": {
+    "title": "Black gram.jpg",
+    "author": "Sanjay Acharya",
+    "source": "https://commons.wikimedia.org/wiki/File:Black_gram.jpg",
+    "license": "CC BY-SA 3.0",
+    "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+  },
+  "stem-borer": {
+    "title": "Rice yellow stem borer.jpg",
+    "author": "Md.Farhan Nabil",
+    "source": "https://commons.wikimedia.org/wiki/File:Rice_yellow_stem_borer.jpg",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+  }
+}

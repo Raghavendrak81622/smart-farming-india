@@ -48,34 +48,33 @@ WATCH = {
     ],
 }
 
-RICE_TREATMENT = {
-    "name": "Cartap hydrochloride 75% SG",
-    "target": "Yellow stem borer in rice",
-    "instructions": "A PPQS-hosted label for this formulation lists a knapsack or equivalent calibrated sprayer and a 48-hour re-entry interval. Confirm current registration and the exact formulation, dose and harvest interval on the pack with a Krishi Vigyan Kendra before use.",
-    "source": RICE_LABEL,
+ARCHIVED_LABELS = {"rice": RICE_LABEL, "chickpea": PULSE_LABEL, "pigeonpeas": PULSE_LABEL}
+
+FIELD_DETAILS = {
+    "Yellow stem borer": ("Nursery, tillering and heading", "Watch the growing point and developing heads during susceptible stages.", "Check several parts of the field for egg masses, dead hearts and white heads.", "stem-borer"),
+    "Rice blast": ("Vegetative growth to heading", "Leaf wetness and susceptible varieties favour infection.", "Inspect leaf lesions and the neck beneath emerging heads.", "rice-blast"),
+    "Fall armyworm": ("Seedlings and whorl stage", "Young maize with fresh whorl feeding needs close inspection.", "Open the whorl and confirm fresh frass and live larvae before treatment.", "fall-armyworm"),
+    "Post-flowering stalk rot": ("After flowering", "Stress around flowering can predispose the crop.", "Check for soft stalks or lodging in affected patches.", None),
+    "Gram pod borer": ("Flowering and pod formation", "Tender flowers and developing pods provide feeding sites.", "Check plants for eggs, caterpillars and holes in pods.", "pod-borer"),
+    "Wilt and root rot": ("Seedling to vegetative growth", "Fields with recurring wilt need particular attention.", "Inspect the roots and stem of affected plants, then seek a diagnosis.", None),
+    "Pod borers": ("Flowering and pod development", "Flowers and young pods are vulnerable to several species.", "Inspect flower clusters and pods. Confirm the species before selecting control.", None),
+    "Fusarium wilt": ("Vegetative growth onward", "Repeated pigeon pea in the same field increases concern where wilt has occurred.", "Check wilted plants in patches and inspect stem tissue near the soil line.", None),
+    "Whitefly": ("Early leaf growth onward", "Whiteflies can carry yellow mosaic virus.", "Turn leaves over and inspect new growth and field edges.", "whitefly"),
+    "Yellow mosaic": ("Early leaf growth onward", "Whitefly movement can spread the disease.", "Check new leaves for yellow mosaic and confirm the diagnosis.", None),
 }
-
-def pod_borer_label(crop, interval):
-    return {
-        "name": "Spinetoram 11.7% w/w SC",
-        "target": "Confirmed gram pod borer in " + crop,
-        "instructions": (
-            f"The PPQS label indicates 24-hour re-entry and a {interval}-day pre-harvest interval. "
-            "Use a calibrated foliar sprayer only after a local adviser confirms treatment is needed. "
-            "Check the current pack label for the rate and verify crop and pest applicability. "
-            "Follow the label’s protective clothing requirements and avoid spraying near water or while bees forage."
-        ),
-        "source": PULSE_LABEL,
-    }
-
-LABELS = {"rice": RICE_TREATMENT, "chickpea": pod_borer_label("chickpea", 20),
-          "pigeonpeas": pod_borer_label("pigeon pea", 23)}
 
 
 def guidance(crop):
+    threats = []
+    for name, kind, signs, ipm, source in WATCH[crop]:
+        stage, conditions, monitoring, image = FIELD_DETAILS[name]
+        threats.append({
+            "name": name, "kind": kind, "signs": signs, "ipm": ipm, "source": source,
+            "stage": stage, "conditions": conditions, "monitoring": monitoring, "image": image,
+        })
     return {
-        "watchlist": [{"name": name, "kind": kind, "signs": signs, "ipm": ipm, "source": source}
-                      for name, kind, signs, ipm, source in WATCH[crop]],
-        "label_reference": LABELS.get(crop),
-        "safety": "Use the product label’s protective equipment, re-entry and harvest instructions. Consult a Krishi Vigyan Kendra or agricultural officer before choosing a pesticide.",
+        "watchlist": threats,
+        "threat_evidence": "Common crop threats. Regional surveillance and current outbreak status are unavailable.",
+        "label_reference": ARCHIVED_LABELS.get(crop),
+        "safety": "Current registration and the exact crop–pest label could not be verified. Consult your local Krishi Vigyan Kendra or agricultural officer. Follow the current label for protective equipment, re-entry and harvest intervals.",
     }

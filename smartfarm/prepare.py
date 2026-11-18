@@ -1,18 +1,15 @@
-"""Rebuild the local lookup database and train the two crop classifiers."""
+"""Rebuild farm evidence and report retrospective validation."""
 from contextlib import closing
 from pathlib import Path
 import json
 import sqlite3
 import zipfile
 
-import joblib
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.model_selection import train_test_split
 
 from smartfarm.catalog import CROPS, location_key
+from smartfarm.climate import prepare_climate
 
 ROOT = Path(__file__).resolve().parents[1]
 WORK = ROOT / "cache"
@@ -68,6 +65,22 @@ def prepare():
     with zipfile.ZipFile(ROOT / "archive (1).zip") as archive, archive.open("csv/2026.csv") as recent:
         batches.extend(prices(chunk, "%Y-%m-%d") for chunk in pd.read_csv(recent, chunksize=100_000))
     quotes = pd.concat(batches, ignore_index=True).drop_duplicates()
+    quotes["unit"] = None
+    quotes["source"] = None
+    verified = SOURCES / "verified_prices.csv"
+    if verified.is_file():
+        reported = pd.read_csv(verified)
+        required = {"State", "District", "Market", "Commodity", "Variety", "Grade", "Arrival_Date", "Modal_Price",
+                    "unit", "source"}
+        if not required.issubset(reported.columns):
+            raise ValueError("The verified price file is missing required columns. See README.md.")
+        provenance = reported.source.fillna("").str.fullmatch(
+            r"https://(?:[a-z0-9-]+\.)*gov\.in/\S*", case=False)
+        reported = reported.loc[provenance & reported.unit.eq("INR/quintal")].copy()
+        confirmed = prices(reported, "%Y-%m-%d")
+        confirmed = confirmed.assign(unit=reported.loc[confirmed.index, "unit"],
+                                     source=reported.loc[confirmed.index, "source"])
+        quotes = pd.concat([quotes, confirmed], ignore_index=True).drop_duplicates()
 
     with closing(sqlite3.connect(temp)) as db, db:
         points.to_sql("pins", db, index=False)
@@ -77,6 +90,35 @@ def prepare():
         db.execute("CREATE INDEX yield_lookup ON yields(state,season,crop,district,year)")
         db.execute("CREATE INDEX quotes_lookup ON quotes(crop,state,district,date)")
     temp.replace(WORK / "evidence.sqlite")
+    prepare_climate(ROOT, WORK)
+    try:
+        scores, holdout_size = validate_legacy_classifiers()
+    except ImportError as error:
+        print(f"Legacy model audit skipped. Reinstall the pinned scikit-learn wheel to run it: {error}")
+        scores, holdout_size = {}, 0
+
+    holdout_errors = []
+    for _, series in annual.groupby(["state", "district", "crop", "season"]):
+        values = series.sort_values("year")
+        recent = values.iloc[-6:]
+        rates = (recent.Production / recent.Area).to_numpy()
+        if len(rates) >= 4 and recent.year.iloc[-1] >= 2018:
+            holdout_errors.append(abs(float(np.mean(rates[:-1])) - rates[-1]))
+    audit = {
+        "postal_candidates": len(points), "district_crop_season_years": len(annual), "price_rows": len(quotes),
+        "legacy_classifier_source_holdout_rows": holdout_size, "legacy_source_holdout_accuracy": scores,
+        "yield_latest_year_holdout_groups": len(holdout_errors),
+        "yield_latest_year_holdout_mae_t_per_ha": float(np.mean(holdout_errors)) if holdout_errors else None,
+    }
+    (WORK / "validation.json").write_text(json.dumps(audit, indent=2), encoding="utf-8")
+    print(json.dumps(audit, indent=2))
+
+
+def validate_legacy_classifiers():
+    import joblib
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.metrics import accuracy_score
+    from sklearn.model_selection import train_test_split
 
     data = pd.read_csv(ROOT / "Crop_recommendation.csv")
     data.columns = data.columns.str.lower()
@@ -90,18 +132,4 @@ def prepare():
         scores[mode] = accuracy_score(test.label, model.predict(test[columns]))
         models[mode] = {"model": model, "fields": columns}
     joblib.dump(models, WORK / "crops.joblib", compress=3)
-    holdout_errors = []
-    for _, series in annual.groupby(["state", "district", "crop", "season"]):
-        values = series.sort_values("year")
-        recent = values.iloc[-6:]
-        rates = (recent.Production / recent.Area).to_numpy()
-        if len(rates) >= 4 and recent.year.iloc[-1] >= 2018:
-            holdout_errors.append(abs(float(np.median(rates[:-1])) - rates[-1]))
-    audit = {
-        "postal_candidates": len(points), "district_crop_season_years": len(annual), "price_rows": len(quotes),
-        "crop_classifier_source_holdout_rows": len(test), "source_holdout_accuracy": scores,
-        "yield_latest_year_holdout_groups": len(holdout_errors),
-        "yield_latest_year_holdout_mae_t_per_ha": float(np.mean(holdout_errors)) if holdout_errors else None,
-    }
-    (WORK / "validation.json").write_text(json.dumps(audit, indent=2), encoding="utf-8")
-    print(json.dumps(audit, indent=2))
+    return scores, len(test)

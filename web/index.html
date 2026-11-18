@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Smart Farming India</title>
+<title>Fieldwise · Smart Farming India</title>
 <link rel="stylesheet" href="/assets/style.css">
 <script src="/assets/app.js" type="module"></script>
 </head>
@@ -11,41 +11,64 @@
 <header class="masthead">
   <div class="frame brand">
     <svg width="34" height="34" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="11" fill="#d8e7b3"/><path d="M18 27v-9m0 5c-6 0-9-4-9-9 6 0 9 3 9 9Zm0-4c0-6 3-9 9-9 0 5-3 9-9 9Z" fill="none" stroke="#244a2a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <span>Smart Farming India</span>
+    <span>Fieldwise</span>
   </div>
 </header>
 <main class="frame">
-  <section class="intro">
+  <nav class="navigation" aria-label="Main navigation">
+    <a href="#dashboard">Dashboard</a><a href="#plan">Get Farming Plan</a>
+    <a href="#saved">My Farm Plans</a><a href="#crops">Crop Information</a><a href="#market">Market Prices</a>
+  </nav>
+  <section id="dashboard" class="page">
+    <section class="intro">
     <h1>What should you grow?</h1>
     <p>Use your soil report, PIN code and land size to compare crops and estimate your harvest and returns.</p>
+      <a class="action" href="#plan">Get Farming Plan</a>
+    </section>
   </section>
+  <section id="plan" class="page" hidden>
+  <header class="page-title"><h1>Get Farming Plan</h1></header>
   <form id="farm" class="card">
     <fieldset>
       <legend>Farm location and size</legend>
-      <div class="fields two">
+      <div class="fields three">
         <label>Indian PIN code<input name="pin" inputmode="numeric" pattern="[1-9][0-9]{5}" maxlength="6" placeholder="e.g. 440001" autocomplete="postal-code" required aria-describedby="pin-status"></label>
         <label>Land size (acres)<input name="acres" type="number" min="0.01" max="10000" step="any" placeholder="e.g. 2" required></label>
+        <label>Farming season<select name="season" required><option value="">Choose season</option><option>Kharif</option><option>Rabi</option><option>Zaid</option></select></label>
       </div>
       <p id="pin-status" class="small" role="status"></p>
       <label id="place-choice" hidden>Choose district for this PIN<select name="location_index"></select></label>
     </fieldset>
     <fieldset>
       <legend>Soil report</legend>
+      <label class="upload">Import soil report (optional)<input id="soil-upload" type="file" accept="application/pdf,image/png,image/jpeg,image/webp"></label>
+      <p id="soil-status" class="small" role="status">PDF or clear soil-report image, up to 8 MB.</p>
       <div class="fields four">
         <label>Soil pH<input name="ph" type="number" min="0" max="14" step="any" placeholder="e.g. 6.5" required></label>
-        <label>Nitrogen (N)<input name="n" type="number" min="0" max="100000" step="any" placeholder="Optional"></label>
-        <label>Phosphorus (P)<input name="p" type="number" min="0" max="100000" step="any" placeholder="Optional"></label>
-        <label>Potassium (K)<input name="k" type="number" min="0" max="100000" step="any" placeholder="Optional"></label>
+        <label>Nitrogen (N)<input name="n" type="number" min="0" max="100000" step="any" required></label>
+        <label>Phosphorus (P)<input name="p" type="number" min="0" max="100000" step="any" required></label>
+        <label>Potassium (K)<input name="k" type="number" min="0" max="100000" step="any" required></label>
       </div>
       <div class="unit-row">
-        <label class="choice"><input type="checkbox" name="source_scale"> These NPK numbers use the training CSV’s numeric scale</label>
-        <p class="small">Leave this unchecked for ordinary soil reports. The training file does not document its NPK units.</p>
+        <label>Nutrient reporting units<select name="nutrient_unit"><option value="kg_ha">Available elemental N, P and K (kg/ha)</option><option value="other">Other or unknown units</option></select></label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Growing conditions</legend>
+      <div class="fields three">
+        <label>Irrigation<select name="irrigation" required><option value="">Choose water access</option><option>Rainfed</option><option>Partially irrigated</option><option>Irrigated</option></select></label>
+        <label>Soil type<select name="soil_type"><option>Unknown</option><option>Sandy</option><option>Loamy</option><option>Clay</option><option>Red</option><option>Black</option><option>Alluvial</option><option>Laterite</option></select></label>
+        <label>Previous crop (optional)<input name="previous_crop" maxlength="100"></label>
       </div>
     </fieldset>
     <button type="submit">Compare crops <span aria-hidden="true">→</span></button>
     <p id="request-status" role="status"></p>
   </form>
-  <section id="results" aria-label="Farming recommendations"></section>
+  </section>
+  <section id="results" class="page stack" aria-label="Farming recommendations" hidden></section>
+  <section id="saved" class="page stack" hidden></section>
+  <section id="crops" class="page stack" hidden></section>
+  <section id="market" class="page stack" hidden></section>
 </main>
 </body>
 </html>
